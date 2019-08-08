@@ -64,7 +64,7 @@ class _SplashScreenState extends State<SplashScreen> {
             child:Column(
               children: <Widget>[
                 _infoTile('App version', _packageInfo.version),
-                _infoTile('Provided by','Tarento Technologies',style: TextStyle(
+                _infoTile('Powered by:','Tarento Technologies',style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.w400,
                   fontFamily: 'Roboto',

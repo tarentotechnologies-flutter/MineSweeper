@@ -27,17 +27,22 @@ dependencies:
   toast: ^0.1.5
   animated_splash: ^1.0.0
   package_info: ^0.4.0+6
+  flutter_launcher_icons: ^0.7.2+1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
+flutter_icons:
+    android: "launcher_icon"
+    ios: true
+    image_path: "assets/images/icons.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter.
 flutter:
+
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

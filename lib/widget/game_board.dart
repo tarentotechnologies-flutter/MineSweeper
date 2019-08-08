@@ -14,7 +14,7 @@ enum GameResult { WON, LOST, TIME_LIMIT_EXCEEDED }
 class GameBoard extends StatefulWidget {
   var Level;
 
-  GameBoard({Key key,  this.Level}) : super(key: key);
+  GameBoard({Key key, this.Level}) : super(key: key);
   @override
   _GameBoardState createState() => _GameBoardState();
 }
@@ -22,12 +22,11 @@ class GameBoard extends StatefulWidget {
 class _GameBoardState extends State<GameBoard> {
   var Level;
 
-
   final int timeLimit = 999;
 
-   int numOfRows;
-   int numOfColumns;
-   int numOfMines;
+  int numOfRows;
+  int numOfColumns;
+  int numOfMines;
 
   List<List<TileState>> gameTilesState;
   List<List<bool>> gameTilesMineStatus;
@@ -91,40 +90,40 @@ class _GameBoardState extends State<GameBoard> {
   @override
   void initState() {
     print(widget.Level);
-    switch(widget.Level) {
-      case "Easy": {
-       numOfRows = 5;
-        numOfColumns = 5;
-        numOfMines = 7;
+    switch (widget.Level) {
+      case "Easy":
+        {
+          numOfRows = 5;
+          numOfColumns = 5;
+          numOfMines = 7;
+        }
+        break;
 
-      }
-      break;
+      case "Medium":
+        {
+          numOfRows = 7;
+          numOfColumns = 7;
+          numOfMines = 9;
+        }
+        break;
 
-      case "Medium": {
-        numOfRows = 7;
-        numOfColumns = 7;
-        numOfMines = 9;
-
-      }
-      break;
-
-      case "Hard": {
-        numOfRows = 9;
-        numOfColumns = 9;
-        numOfMines = 14;
-
-      }
-      break;
-      default: {
-        numOfRows = 9;
-        numOfColumns = 9;
-        numOfMines = 14;
-      }
-      break;
+      case "Hard":
+        {
+          numOfRows = 9;
+          numOfColumns = 9;
+          numOfMines = 14;
+        }
+        break;
+      default:
+        {
+          numOfRows = 9;
+          numOfColumns = 9;
+          numOfMines = 14;
+        }
+        break;
     }
     resetBoard();
     super.initState();
-
   }
 
   Widget _buildBoard() {
@@ -145,7 +144,7 @@ class _GameBoardState extends State<GameBoard> {
           if (tileState != TileState.blown)
             //if the current tile has a mine, reveal it, else let it be
             tileState =
-            gameTilesMineStatus[y][x] ? TileState.revealed : tileState;
+                gameTilesMineStatus[y][x] ? TileState.revealed : tileState;
         }
 
         if (tileState == TileState.covered || tileState == TileState.flagged) {
@@ -194,18 +193,16 @@ class _GameBoardState extends State<GameBoard> {
 //    //the user can win the game only when you've opened all the tiles and
 //    //marked all mine tiles as flagged
 
-      if (!doesBoardHaveACoveredTile) {
-        if ((minesFound == numOfMines) && isUserAlive) {
-          hasUserWonGame = true;
-          isUserAlive = false;
-          _stopGameTimer();
-          final overlay = Overlay.of(context);
-          WidgetsBinding.instance.addPostFrameCallback((_) => overlay.insert( _showGameStatusDialog(GameResult.WON)));
-
-        }
+    if (!doesBoardHaveACoveredTile) {
+      if ((minesFound == numOfMines) && isUserAlive) {
+        hasUserWonGame = true;
+        isUserAlive = false;
+        _stopGameTimer();
+        final overlay = Overlay.of(context);
+        WidgetsBinding.instance.addPostFrameCallback(
+            (_) => overlay.insert(_showGameStatusDialog(GameResult.WON)));
       }
-
-
+    }
 
     return Container(
       padding: const EdgeInsets.all(10.0),
@@ -223,10 +220,11 @@ class _GameBoardState extends State<GameBoard> {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
+//          leading: _buildTimerWidget(timeElapsed),
           title: Text("Minesweeper"),
           actions: <Widget>[
-//            LeaderboardIcon(),
-//            ProfileIcon(),
+            _buildMinesFoundCountWidget(),
+            _buildTotalMineCountWidget(),
           ],
         ),
         resizeToAvoidBottomPadding: false,
@@ -240,9 +238,9 @@ class _GameBoardState extends State<GameBoard> {
                 children: <Widget>[
                   Row(
                     children: <Widget>[
-                      _buildMinesFoundCountWidget(),
+//                      _buildMinesFoundCountWidget(),
                       SizedBox(width: 12.0),
-                      _buildTotalMineCountWidget(),
+//                      _buildTotalMineCountWidget(),
                     ],
                   ),
                   _buildTimerWidget(timeElapsed),
@@ -254,7 +252,6 @@ class _GameBoardState extends State<GameBoard> {
           ),
         ));
   }
-
 
   /*
   Check if the tile tapped lies inside the board or not. This is needed so that
@@ -372,6 +369,7 @@ class _GameBoardState extends State<GameBoard> {
       }
     });
   }
+
   _buildTimerWidget(int timeElapsed) {
     int unitsDigit = timeElapsed % 10;
     int hundredsDigit = timeElapsed ~/ 100;
@@ -381,7 +379,8 @@ class _GameBoardState extends State<GameBoard> {
       _stopGameTimer();
       isUserAlive = false;
       final overlay = Overlay.of(context);
-      WidgetsBinding.instance.addPostFrameCallback((_) => overlay.insert( _showGameStatusDialog(GameResult.TIME_LIMIT_EXCEEDED)));
+      WidgetsBinding.instance.addPostFrameCallback((_) => overlay
+          .insert(_showGameStatusDialog(GameResult.TIME_LIMIT_EXCEEDED)));
 //      _showGameStatusDialog(GameResult.TIME_LIMIT_EXCEEDED);
     }
 
@@ -461,10 +460,9 @@ class _GameBoardState extends State<GameBoard> {
     );
   }
 
-
-  _showGameStatusDialog(gameResult) async  {
+  _showGameStatusDialog(gameResult) async {
     print(gameResult);
-  await showDialog(
+    await showDialog(
         context: context,
         builder: (context) {
           return _gameStatusDialog(gameResult);
@@ -472,7 +470,6 @@ class _GameBoardState extends State<GameBoard> {
   }
 
   _gameStatusDialog(gameResult) {
-
     int timeElasped = stopwatch.elapsedMilliseconds ~/ 1000;
     String resultText = "You lose in $timeElasped Sec";
     switch (gameResult) {
