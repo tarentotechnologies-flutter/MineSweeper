@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:Minesweeper/pages/game_page.dart';
 import 'package:Minesweeper/widget/tiles/game_board_covered_mine_tile.dart';
 import 'package:Minesweeper/widget/tiles/game_board_open_mine_tile.dart';
+import 'package:Minesweeper/widget/game_board.dart';
+//import 'package:mineswiprrrr/game_board.dart';
 import 'package:Minesweeper/widget/tiles/game_board_tile.dart';
 import 'dart:math';
 import 'package:Minesweeper/pages/Settings.dart';
@@ -36,26 +38,36 @@ class _GameBoardState extends State<GameBoard> {
   int minesFound;
   Timer timer;
   Stopwatch stopwatch = Stopwatch();
-
   @override
   void dispose() {
     timer?.cancel();
     super.dispose();
   }
 
-  void resetBoard() {
+  void reset() {
+    setState(() {
+//      isUserAlive = true;
+//      hasUserWonGame = false;
+//      minesFound = 0;
+//      stopwatch.reset();
+//      _stopGameTimer();
+      _GameBoardState();
+
+    });
+
+
     isUserAlive = true;
     hasUserWonGame = false;
     minesFound = 0;
-
     stopwatch.reset();
     _stopGameTimer();
+//    _GameBoardState();
     //the callback method just invokes setState() because we want the time to update
     //every second
 
     timer = Timer.periodic(
       Duration(seconds: 1),
-      (timer) {
+          (timer) {
         setState(() {});
       },
     );
@@ -86,7 +98,6 @@ class _GameBoardState extends State<GameBoard> {
       }
     }
   }
-
   @override
   void initState() {
     print(widget.Level);
@@ -98,7 +109,6 @@ class _GameBoardState extends State<GameBoard> {
           numOfMines = 7;
         }
         break;
-
       case "Medium":
         {
           numOfRows = 7;
@@ -106,7 +116,6 @@ class _GameBoardState extends State<GameBoard> {
           numOfMines = 9;
         }
         break;
-
       case "Hard":
         {
           numOfRows = 9;
@@ -122,10 +131,9 @@ class _GameBoardState extends State<GameBoard> {
         }
         break;
     }
-    resetBoard();
+    reset();
     super.initState();
   }
-
   Widget _buildBoard() {
     //covered tile = un-opened tile
     bool doesBoardHaveACoveredTile = false;
@@ -144,9 +152,8 @@ class _GameBoardState extends State<GameBoard> {
           if (tileState != TileState.blown)
             //if the current tile has a mine, reveal it, else let it be
             tileState =
-                gameTilesMineStatus[y][x] ? TileState.revealed : tileState;
+            gameTilesMineStatus[y][x] ? TileState.revealed : tileState;
         }
-
         if (tileState == TileState.covered || tileState == TileState.flagged) {
           rowChildren.add(
             GestureDetector(
@@ -182,14 +189,12 @@ class _GameBoardState extends State<GameBoard> {
           );
         }
       }
-
       gameBoardRow.add(Row(
         children: rowChildren,
         mainAxisAlignment: MainAxisAlignment.center,
         key: ValueKey<int>(y),
       ));
     }
-
 //    //the user can win the game only when you've opened all the tiles and
 //    //marked all mine tiles as flagged
 
@@ -200,10 +205,9 @@ class _GameBoardState extends State<GameBoard> {
         _stopGameTimer();
         final overlay = Overlay.of(context);
         WidgetsBinding.instance.addPostFrameCallback(
-            (_) => overlay.insert(_showGameStatusDialog(GameResult.WON)));
+                (_) => overlay.insert(_showGameStatusDialog(GameResult.WON)));
       }
     }
-
     return Container(
       padding: const EdgeInsets.all(10.0),
       child: Column(
@@ -212,7 +216,6 @@ class _GameBoardState extends State<GameBoard> {
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     int timeElapsed = stopwatch.elapsedMilliseconds ~/ 1000;
@@ -239,7 +242,7 @@ class _GameBoardState extends State<GameBoard> {
                   Row(
                     children: <Widget>[
 //                      _buildMinesFoundCountWidget(),
-                      SizedBox(width: 12.0),
+                      SizedBox(width: 14.0),
 //                      _buildTotalMineCountWidget(),
                     ],
                   ),
@@ -247,7 +250,25 @@ class _GameBoardState extends State<GameBoard> {
                 ],
               ),
               _buildBoard(),
-              _buildResetWidget(),
+              SizedBox(
+                  width: 250,
+                  child: RaisedButton(
+                    shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(45.0),
+                    ),
+                    color: Colors.red,
+                    onPressed: () => reset(),
+                    padding: const EdgeInsets.all(12.0),
+
+                    child: Text("RESET",style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontFamily: 'Roboto',
+                      letterSpacing: 0.5,
+                      fontSize: 15,
+                    ),),
+                  )
+              )
+              // _buildResetWidget(),
             ],
           ),
         ));
@@ -392,25 +413,25 @@ class _GameBoardState extends State<GameBoard> {
       ),
       child: timeElapsed > timeLimit
           ? Text(
-              "∞",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 24.0,
-              ),
-            )
+        "âˆž",
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 24.0,
+        ),
+      )
           : Row(
-              children: <Widget>[
-                _buildDigitContainer(hundredsDigit),
-                _buildDigitContainer(tensDigit),
-                _buildDigitContainer(unitsDigit),
-              ],
-            ),
+        children: <Widget>[
+          _buildDigitContainer(hundredsDigit),
+          _buildDigitContainer(tensDigit),
+          _buildDigitContainer(unitsDigit),
+        ],
+      ),
     );
   }
 
   _buildResetWidget() {
     return RaisedButton(
-      onPressed: () => resetBoard(),
+      onPressed: () => reset(),
       child: Container(
         padding: const EdgeInsets.all(12.0),
         child: Text("RESET"),
