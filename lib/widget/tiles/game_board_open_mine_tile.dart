@@ -39,16 +39,12 @@ class OpenMineTile extends StatelessWidget {
         );
       }
     } else {
-      text = RichText(
-        textAlign: TextAlign.center,
-        text: TextSpan(
-          text: "\u2620",
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      );
+      text =
+          Image.asset(
+            'assets/images/bomb.png',
+            fit: BoxFit.cover,
+          ) ;
+
     }
 
     return Tile(

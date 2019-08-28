@@ -23,11 +23,20 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
-  flutter_share_me: ^0.4.0
   toast: ^0.1.5
   animated_splash: ^1.0.0
   package_info: ^0.4.0+6
   flutter_launcher_icons: ^0.7.2+1
+
+  http: ^0.12.0+2
+  gradient_text: ^1.0.2
+  share: ^0.6.2+1
+  sqflite: ^1.1.6
+  path_provider: ^1.2.0
+  shared_preferences: ^0.5.3+4
+  firebase_admob: ^0.9.0+4
+
+
 
 dev_dependencies:
   flutter_test:
@@ -57,6 +66,12 @@ flutter:
       - assets/images/setting.png
       - assets/images/giphy.gif
       - assets/images/playred.png
+      - assets/images/bomb.png
+      - assets/images/river.jpg
+      - assets/images/giphy.gif
+      - assets/images/mindsweeper-text.png
+      - assets/images/play.png
+      - assets/images/flag.png
 
 
 

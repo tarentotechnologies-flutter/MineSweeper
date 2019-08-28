@@ -18,16 +18,21 @@ class CoveredMineTile extends StatelessWidget {
       child: InnerTile(
         child: flagged
             ? Center(
-                child: RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                    text: "\u2690",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+            child:Image.asset(
+          'assets/images/flag.png',
+          fit: BoxFit.cover,
+        )
+
+//                RichText(
+//                  textAlign: TextAlign.center,
+//                  text: TextSpan(
+//                    text: "\u2690",
+//                    style: TextStyle(
+//                      color: Colors.black,
+//                      fontWeight: FontWeight.bold,
+//                    ),
+//                  ),
+//                ),
               )
             : InnerTile(),
       ),

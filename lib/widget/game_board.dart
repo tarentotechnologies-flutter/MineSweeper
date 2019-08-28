@@ -1,26 +1,35 @@
 import 'dart:async';
-
-//import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:Minesweeper/pages/dbHelper.dart';
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
 import 'package:Minesweeper/pages/game_page.dart';
 import 'package:Minesweeper/widget/tiles/game_board_covered_mine_tile.dart';
 import 'package:Minesweeper/widget/tiles/game_board_open_mine_tile.dart';
 import 'package:Minesweeper/widget/game_board.dart';
-//import 'package:mineswiprrrr/game_board.dart';
 import 'package:Minesweeper/widget/tiles/game_board_tile.dart';
 import 'dart:math';
-import 'package:Minesweeper/pages/Settings.dart';
+import 'package:gradient_text/gradient_text.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:Minesweeper/model/highscoremodal.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
+
 
 enum GameResult { WON, LOST, TIME_LIMIT_EXCEEDED }
 
 class GameBoard extends StatefulWidget {
   var Level;
 
-  GameBoard({Key key, this.Level}) : super(key: key);
+  var name;
+
+  var email;
+
+  var url;
+
+  GameBoard({Key key, this.Level, this.name, this.email, this.url}) : super(key: key);
   @override
   _GameBoardState createState() => _GameBoardState();
 }
-
 class _GameBoardState extends State<GameBoard> {
   var Level;
 
@@ -32,12 +41,22 @@ class _GameBoardState extends State<GameBoard> {
 
   List<List<TileState>> gameTilesState;
   List<List<bool>> gameTilesMineStatus;
-
+  DbHelper databaseHelper = DbHelper();
+  List<HighScore> highscore;
   bool isUserAlive;
   bool hasUserWonGame;
   int minesFound;
   Timer timer;
   Stopwatch stopwatch = Stopwatch();
+
+  Future<List<HighScore>> topscore;
+
+  int finalscore;
+
+  SharedPreferences sharedPreferences;
+
+  int BestScore;
+
   @override
   void dispose() {
     timer?.cancel();
@@ -45,23 +64,14 @@ class _GameBoardState extends State<GameBoard> {
   }
 
   void reset() {
-    setState(() {
-//      isUserAlive = true;
-//      hasUserWonGame = false;
-//      minesFound = 0;
-//      stopwatch.reset();
-//      _stopGameTimer();
       _GameBoardState();
-
-    });
-
 
     isUserAlive = true;
     hasUserWonGame = false;
+
     minesFound = 0;
     stopwatch.reset();
     _stopGameTimer();
-//    _GameBoardState();
     //the callback method just invokes setState() because we want the time to update
     //every second
 
@@ -98,8 +108,21 @@ class _GameBoardState extends State<GameBoard> {
       }
     }
   }
+
   @override
   void initState() {
+    Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+    prefs.then(
+            (pref) {
+              if(BestScore == null){
+                BestScore = 0;
+              }
+              else {
+                BestScore = pref.getInt('score');
+                print(BestScore);
+              }
+        }
+    );
     print(widget.Level);
     switch (widget.Level) {
       case "Easy":
@@ -134,6 +157,7 @@ class _GameBoardState extends State<GameBoard> {
     reset();
     super.initState();
   }
+
   Widget _buildBoard() {
     //covered tile = un-opened tile
     bool doesBoardHaveACoveredTile = false;
@@ -192,6 +216,7 @@ class _GameBoardState extends State<GameBoard> {
       gameBoardRow.add(Row(
         children: rowChildren,
         mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
         key: ValueKey<int>(y),
       ));
     }
@@ -202,76 +227,123 @@ class _GameBoardState extends State<GameBoard> {
       if ((minesFound == numOfMines) && isUserAlive) {
         hasUserWonGame = true;
         isUserAlive = false;
+        finalscore = stopwatch.elapsed.inSeconds;
         _stopGameTimer();
+         fristinsert(finalscore);
+
         final overlay = Overlay.of(context);
         WidgetsBinding.instance.addPostFrameCallback(
                 (_) => overlay.insert(_showGameStatusDialog(GameResult.WON)));
       }
     }
     return Container(
-      padding: const EdgeInsets.all(10.0),
+      padding: const EdgeInsets.all(0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: gameBoardRow,
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
+    FirebaseAdMob.instance.initialize(appId:"com.example.minesweeper").then((response){
+      myBanner..load()..show(
+        anchorOffset: 80.0,
+        anchorType: AnchorType.top,
+      );
+    });
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     int timeElapsed = stopwatch.elapsedMilliseconds ~/ 1000;
 
     return Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-//          leading: _buildTimerWidget(timeElapsed),
-          title: Text("Minesweeper"),
-          actions: <Widget>[
-            _buildMinesFoundCountWidget(),
-            _buildTotalMineCountWidget(),
-          ],
+
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        centerTitle: true,
+        iconTheme: IconThemeData(
+            color: Colors.black //change your color here
         ),
-        resizeToAvoidBottomPadding: false,
-        body: Container(
-          color: Colors.white,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              Row(
+
+        title: GradientText("MINDSWEEPER",
+            gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.center,
+                //end: Alignment.bottomCenter,
+                colors: [
+                  Colors.deepOrange[500],
+                  Colors.yellow[100],
+                  Colors.deepOrange
+                ]
+            ),
+            style: TextStyle(fontSize: 20),
+            textAlign: TextAlign.center),
+
+      ),
+      resizeToAvoidBottomPadding: false,
+      body: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
+            //padding: EdgeInsets.all(5),
+            child: Image.asset(
+              'assets/images/river.jpg',
+              width: 600,
+              height: 100,
+              fit: BoxFit.cover,
+
+            ),
+
+          ),
+          Padding(
+            padding: EdgeInsets.all(0),
+            child: SizedBox(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-//                      _buildMinesFoundCountWidget(),
-                      SizedBox(width: 14.0),
-//                      _buildTotalMineCountWidget(),
-                    ],
-                  ),
+                children: [
+                  _buildMinesFoundCountWidget(),
+                   _buildBestScoreWidget(),
                   _buildTimerWidget(timeElapsed),
                 ],
-              ),
-              _buildBoard(),
-              SizedBox(
-                  width: 250,
-                  child: RaisedButton(
-                    shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(45.0),
-                    ),
-                    color: Colors.red,
-                    onPressed: () => reset(),
-                    padding: const EdgeInsets.all(12.0),
 
-                    child: Text("RESET",style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: 'Roboto',
-                      letterSpacing: 0.5,
-                      fontSize: 15,
-                    ),),
-                  )
-              )
-              // _buildResetWidget(),
-            ],
+              ),
+            ),
+
           ),
-        ));
+
+
+          _buildBoard(),
+
+
+        ],
+
+      ),
+      bottomSheet: Container(
+        color: Colors.white,
+        height: 70,
+        child: Center(
+            child: SizedBox(
+              height: 60,
+              child: RaisedButton(
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: new BorderRadius.circular(10.0),
+                    side: BorderSide(color: Colors.green)),
+                onPressed: () => reset(),
+                child: Image.asset('assets/images/bomb.png'),
+              ),
+
+            )
+
+
+        ),
+      ),
+
+
+    );
   }
 
   /*
@@ -400,20 +472,17 @@ class _GameBoardState extends State<GameBoard> {
       _stopGameTimer();
       isUserAlive = false;
       final overlay = Overlay.of(context);
-      WidgetsBinding.instance.addPostFrameCallback((_) => overlay
-          .insert(_showGameStatusDialog(GameResult.TIME_LIMIT_EXCEEDED)));
-//      _showGameStatusDialog(GameResult.TIME_LIMIT_EXCEEDED);
+      WidgetsBinding.instance.addPostFrameCallback((_) =>
+          overlay
+              .insert(_showGameStatusDialog(GameResult.TIME_LIMIT_EXCEEDED)));
     }
 
     return Container(
-      padding: const EdgeInsets.all(30.0),
-      decoration: BoxDecoration(
-        color: Colors.yellow,
-        shape: BoxShape.circle,
-      ),
+      padding: const EdgeInsets.all(5.0),
+
       child: timeElapsed > timeLimit
           ? Text(
-        "âˆž",
+        "∞",
         style: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 24.0,
@@ -424,55 +493,24 @@ class _GameBoardState extends State<GameBoard> {
           _buildDigitContainer(hundredsDigit),
           _buildDigitContainer(tensDigit),
           _buildDigitContainer(unitsDigit),
+          Text(
+            "Sec", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24,),
+
+          )
         ],
       ),
     );
   }
 
-  _buildResetWidget() {
-    return RaisedButton(
-      onPressed: () => reset(),
-      child: Container(
-        padding: const EdgeInsets.all(12.0),
-        child: Text("RESET"),
-      ),
-    );
-  }
-
-  _buildTotalMineCountWidget() {
-    return Container(
-      height: 70.0,
-      width: 70.0,
-      decoration: BoxDecoration(
-        color: Colors.red,
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: Text(
-          "$numOfMines",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 28.0,
-          ),
-        ),
-      ),
-    );
-  }
 
   _buildMinesFoundCountWidget() {
     return Container(
-      height: 70.0,
-      width: 70.0,
-      decoration: BoxDecoration(
-        color: Colors.green,
-        shape: BoxShape.circle,
-      ),
       child: Center(
         child: Text(
-          "$minesFound",
+          //"$minesFound",
+          '$minesFound/$numOfMines',
           style: TextStyle(
-            color: Colors.white,
+            color: Colors.red,
             fontWeight: FontWeight.bold,
             fontSize: 28.0,
           ),
@@ -492,29 +530,30 @@ class _GameBoardState extends State<GameBoard> {
 
   _gameStatusDialog(gameResult) {
     int timeElasped = stopwatch.elapsedMilliseconds ~/ 1000;
-    String resultText = "You lose in $timeElasped Sec";
+    String resultText = "You lost in $timeElasped Sec";
     switch (gameResult) {
       case GameResult.WON:
         resultText = "Congratulations... You win $timeElasped Sec";
+        reset();
         break;
       case GameResult.TIME_LIMIT_EXCEEDED:
-        resultText = "Time up. You lose. in $timeElasped Sec";
+        resultText = "Time up. You lost. in $timeElasped Sec";
+        reset();
         break;
       default:
     }
-
     return AlertDialog(
       contentPadding: const EdgeInsets.all(12.0),
       content: Text(
         resultText,
         textAlign: TextAlign.center,
-      ),
+         ),
     );
   }
 
   _buildDigitContainer(int digit) {
     return Container(
-      width: 25.0,
+      // width: .0,
       child: Center(
         child: Text(
           "$digit",
@@ -531,4 +570,62 @@ class _GameBoardState extends State<GameBoard> {
     stopwatch.stop();
     timer?.cancel();
   }
+
+  void fristinsert(int finalscore) async {
+
+    Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+    if(BestScore < finalscore){
+      prefs.then(
+              (pref) {
+            pref.setInt("score", finalscore);
+            BestScore = pref.getInt("score");
+
+          }
+      );
+    }
+
+  }
+
+  _buildBestScoreWidget() {
+    return Container(
+//       width: .0,
+      child: Center(
+        child: Text(
+          BestScore.toString(),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 28.0,
+            color: Colors.green
+          ),
+        ),
+      ),
+    );
+  }
 }
+MobileAdTargetingInfo targetingInfo = new MobileAdTargetingInfo(
+  keywords: <String>['games','mineswiprrrr'],
+  contentUrl: 'https://flutter.io',
+  birthday: new DateTime.now(),
+  childDirected: false,
+  designedForFamilies: false,
+  testDevices: <String>[], // Android emulators are considered test devices
+);
+
+BannerAd myBanner = new BannerAd(
+  adUnitId: "ca-app-pub-3940256099942544/2934735716",
+  size: AdSize.leaderboard,
+  targetingInfo: targetingInfo,
+  listener: (MobileAdEvent
+  event) {
+    print("BannerAd event is $event");
+  },
+);
+
+InterstitialAd myInterstitial = InterstitialAd(
+  adUnitId: InterstitialAd.testAdUnitId,
+  targetingInfo: targetingInfo,
+  listener: (MobileAdEvent event) {
+    print("InterstitialAd event is $event");
+    print('$event');
+  },
+);

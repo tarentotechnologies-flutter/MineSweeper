@@ -1,7 +1,15 @@
 import 'package:Minesweeper/pages/Settings.dart';
 import 'package:Minesweeper/widget/game_board.dart';
+import 'package:Minesweeper/widget/leaderboard_icon.dart';
+import 'package:Minesweeper/widget/profile_icon.dart';
 import 'package:flutter/material.dart';
+//import 'package:social_login/social_login.dart';
+//import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' as JSON;
 import 'dart:async';
+//final facebookLogin = FacebookLogin();
+
 void main() {
   runApp(MaterialApp(
     home: RunScreen(),
@@ -14,9 +22,28 @@ class RunScreen extends StatefulWidget {
   }
 }
 class RunScreenState extends State<RunScreen> {
-  var Choice = 'Medium';
+  bool isLoggedin = false;
+  Map userProfile;
+  var Choice;
+
+  var name;
+  var email;
+
+   var url;
+
+  // Instantiate it
+//  final socialLogin = SocialLogin();
+
+//Before calling any methods, set the configuration
+
   @override
   void initState() {
+    //Before calling any methods, set the configuration
+//    socialLogin.setConfig(SocialConfig(
+//      facebookAppId: '340530816825687',
+//    ),
+
+//    );
     super.initState();
   }
 
@@ -27,6 +54,10 @@ class RunScreenState extends State<RunScreen> {
       appBar: AppBar(
         centerTitle: true,
         title: Text("Minesweeper"),
+        actions: <Widget>[
+          LeaderboardIcon(),
+          ProfileIcon(),
+        ],
       ),
       body:
       Center(
@@ -47,7 +78,7 @@ class RunScreenState extends State<RunScreen> {
                       setState(() {
                         Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context)=>GameBoard(Level: Choice),
+                            MaterialPageRoute(builder: (context)=>GameBoard(Level: Choice, name: name, email: email, url: url),
                             )
                         );
                       });
@@ -91,18 +122,33 @@ class RunScreenState extends State<RunScreen> {
     );
   }
   _ShareFacebook() {
+//    final FacebookUser facebookUser = await socialLogin.logInFacebookWithPermissions(FacebookPermissions.DEFAULT);
+//    print(facebookUser);
     return Container(
-      height: 70.0,
-      width: 70.0,
+      height: 120.0,
+      width: 90.0,
 //      padding: EdgeInsets.only(right: 40.0),
       decoration: BoxDecoration(
         color: Colors.white,
         shape: BoxShape.circle,
       ),
       child: Center(
-          child: new Image(
-              image: new AssetImage('assets/images/facebook.png'),
-              color: null, width: 100, height: 100)
+          child: isLoggedin ? Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Image.network(userProfile["picture"]["data"]["url"], height: 50.0, width: 50.0,),
+              Text(userProfile["name"]),
+              OutlineButton( child: Text("Logout"), onPressed: (){
+                _logout();
+              },)
+            ],
+          ): OutlineButton(child: Text('Login With Facebook'),
+              onPressed: (){
+//                _loginWithFB();
+              }),
+//          child: new Image(
+//              image: new AssetImage('assets/images/facebook.png'),
+//              color: null, width: 100, height: 100)
       ),
     );
   }
@@ -158,4 +204,39 @@ class RunScreenState extends State<RunScreen> {
       ),
     );
   }
+
+  void _logout() {
+//    facebookLogin.logOut();
+    setState(() {
+      isLoggedin = false;
+    });
+  }
+
+//  void _loginWithFB() async {
+//    final result = await facebookLogin.logInWithReadPermissions(['email']);
+//
+//    switch (result.status) {
+//      case FacebookLoginStatus.loggedIn:
+//        final token = result.accessToken.token;
+//        final graphResponse = await http.get('https://graph.facebook.com/v2.12/me?fields=name,picture,email&access_token=${token}');
+//        final profile = JSON.jsonDecode(graphResponse.body);
+//        print(profile);
+//        setState(() {
+//          userProfile = profile;
+//          name = userProfile['name'];
+//          email = userProfile['email'];
+//          url = userProfile["picture"]["data"]["url"].toString();
+//          print(url);
+//          isLoggedin = true;
+//        });
+//        break;
+//
+//      case FacebookLoginStatus.cancelledByUser:
+//        setState(() => isLoggedin = false );
+//        break;
+//      case FacebookLoginStatus.error:
+//        setState(() => isLoggedin = false );
+//        break;
+//    }
+//  }
 }

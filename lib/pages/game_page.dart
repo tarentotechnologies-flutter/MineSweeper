@@ -16,10 +16,10 @@ class GamePage extends StatelessWidget {
         appBar: AppBar(
           centerTitle: true,
           title: Text("Minesweeper"),
-          actions: <Widget>[
+//          actions: <Widget>[
 //            LeaderboardIcon(),
 //            ProfileIcon(),
-          ],
+//          ],
         ),
 //        body: GameBoard(),
         body: RunScreen(),

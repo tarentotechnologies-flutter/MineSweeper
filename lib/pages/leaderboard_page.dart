@@ -17,15 +17,15 @@ class _ProfilePageState extends State<LeaderboardPage> {
       ),
       body: Container(
         child: Center(
-//          child: StreamBuilder(
+          child: StreamBuilder(
 //            stream: Firestore.instance.collection("users").snapshots(),
-//            builder: (context, snapshot) {
-//              if (snapshot.hasData) {
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
 //                List<DocumentSnapshot> documentSnapshotsList =
 //                    snapshot.data.documents;
-//
-//                List<User> usersList = [];
-//
+
+                List<User> usersList = [];
+
 //                documentSnapshotsList.forEach((documentSnapshot) {
 //                  User user = User(
 //                    id: documentSnapshot["user_id"],
@@ -37,19 +37,19 @@ class _ProfilePageState extends State<LeaderboardPage> {
 //
 //                  usersList.add(user);
 //                });
-//
-//                //sort users on the basis of their time score
-//                usersList
-//                    .sort((user1, user2) => user1.score.compareTo(user2.score));
-//
-//                return _buildLeaderboardList(usersList);
-//              } else if (snapshot.hasError)
-//                return Text("false");
-//              else {
-//                return CircularProgressIndicator();
-//              }
-//            },
-//          ),
+
+                //sort users on the basis of their time score
+                usersList
+                    .sort((user1, user2) => user1.score.compareTo(user2.score));
+
+                return _buildLeaderboardList(usersList);
+              } else if (snapshot.hasError)
+                return Text("false");
+              else {
+                return CircularProgressIndicator();
+              }
+            },
+          ),
         ),
       ),
     );
@@ -81,10 +81,10 @@ class _ProfilePageState extends State<LeaderboardPage> {
       height: 70.0,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        image: DecorationImage(
-          fit: BoxFit.cover,
-          image: NetworkImage(user.imageUrl),
-        ),
+//        image: DecorationImage(
+//          fit: BoxFit.cover,
+//          image: NetworkImage(user.imageUrl),
+//        ),
       ),
       child: Container(
         alignment: Alignment.bottomRight,

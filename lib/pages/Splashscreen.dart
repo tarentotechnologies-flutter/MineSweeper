@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:package_info/package_info.dart';
 import 'package:Minesweeper/pages/playScreen.dart';
+import 'package:Minesweeper/pages/Settings.dart';
+
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -21,7 +23,8 @@ class _SplashScreenState extends State<SplashScreen> {
     Timer(
         Duration(seconds: 6),
             () => Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (BuildContext context) => RunScreen())));
+
+            builder: (BuildContext context) => Settings())));
   }
   Future<void> _initPackageInfo() async {
     final PackageInfo info = await PackageInfo.fromPlatform();
@@ -63,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen> {
 //             mainAxisAlignment: MainAxisAlignment.center,
             child:Column(
               children: <Widget>[
-                _infoTile('App version', _packageInfo.version),
+//                _infoTile('App version', _packageInfo.version),
                 _infoTile('Powered by:','Tarento Technologies',style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.w400,
