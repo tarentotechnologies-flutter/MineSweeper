@@ -34,7 +34,7 @@ dependencies:
   sqflite: ^1.1.6
   path_provider: ^1.2.0
   shared_preferences: ^0.5.3+4
-  firebase_admob: ^0.9.0+4
+  firebase_admob: ^0.9.0+6
 
 
 

@@ -16,21 +16,49 @@ import 'package:flutter/services.dart';
 
 
 enum GameResult { WON, LOST, TIME_LIMIT_EXCEEDED }
-
+const String testDevice = 'MobileId';
 class GameBoard extends StatefulWidget {
+
   var Level;
+  final Shader linearGradient = LinearGradient(
+    colors: <Color>[Color(0xffDA44bb), Color(0xff8921aa)],
+  ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
 
-  var name;
-
-  var email;
-
-  var url;
-
-  GameBoard({Key key, this.Level, this.name, this.email, this.url}) : super(key: key);
+  GameBoard({Key key, this.Level}) : super(key: key);
   @override
   _GameBoardState createState() => _GameBoardState();
 }
+
 class _GameBoardState extends State<GameBoard> {
+  static const MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
+    testDevices: testDevice != null ? <String>[testDevice] : null,
+    nonPersonalizedAds: true,
+    keywords: <String>['Game', 'Mario'],
+  );
+
+  BannerAd _bannerAd;
+  InterstitialAd _interstitialAd;
+
+  BannerAd createBannerAd() {
+    return BannerAd(
+        adUnitId: BannerAd.testAdUnitId,
+        //Change BannerAd adUnitId with Admob ID
+        size: AdSize.banner,
+        targetingInfo: targetingInfo,
+        listener: (MobileAdEvent event) {
+          print("BannerAd $event");
+        });
+  }
+
+  InterstitialAd createInterstitialAd() {
+    return InterstitialAd(
+        adUnitId: InterstitialAd.testAdUnitId,
+        //Change Interstitial AdUnitId with Admob ID
+        targetingInfo: targetingInfo,
+        listener: (MobileAdEvent event) {
+          print("IntersttialAd $event");
+        });
+  }
   var Level;
 
   final int timeLimit = 999;
@@ -41,34 +69,32 @@ class _GameBoardState extends State<GameBoard> {
 
   List<List<TileState>> gameTilesState;
   List<List<bool>> gameTilesMineStatus;
-  DbHelper databaseHelper = DbHelper();
-  List<HighScore> highscore;
+
   bool isUserAlive;
   bool hasUserWonGame;
   int minesFound;
   Timer timer;
   Stopwatch stopwatch = Stopwatch();
-
-  Future<List<HighScore>> topscore;
-
-  int finalscore;
-
   SharedPreferences sharedPreferences;
-
   int BestScore;
 
   @override
   void dispose() {
+    _bannerAd.dispose();
+    _interstitialAd.dispose();
+//    myBanner?.dispose();
     timer?.cancel();
     super.dispose();
   }
 
+
   void reset() {
+    setState(() {
       _GameBoardState();
 
+    });
     isUserAlive = true;
     hasUserWonGame = false;
-
     minesFound = 0;
     stopwatch.reset();
     _stopGameTimer();
@@ -108,21 +134,16 @@ class _GameBoardState extends State<GameBoard> {
       }
     }
   }
-
   @override
   void initState() {
+
     Future<SharedPreferences> prefs = SharedPreferences.getInstance();
     prefs.then(
             (pref) {
-              if(BestScore == null){
-                BestScore = 0;
-              }
-              else {
-                BestScore = pref.getInt('score');
-                print(BestScore);
-              }
-        }
-    );
+          BestScore = pref.getInt('score');
+          print(BestScore);
+        });
+
     print(widget.Level);
     switch (widget.Level) {
       case "Easy":
@@ -157,7 +178,6 @@ class _GameBoardState extends State<GameBoard> {
     reset();
     super.initState();
   }
-
   Widget _buildBoard() {
     //covered tile = un-opened tile
     bool doesBoardHaveACoveredTile = false;
@@ -227,10 +247,7 @@ class _GameBoardState extends State<GameBoard> {
       if ((minesFound == numOfMines) && isUserAlive) {
         hasUserWonGame = true;
         isUserAlive = false;
-        finalscore = stopwatch.elapsed.inSeconds;
         _stopGameTimer();
-         fristinsert(finalscore);
-
         final overlay = Overlay.of(context);
         WidgetsBinding.instance.addPostFrameCallback(
                 (_) => overlay.insert(_showGameStatusDialog(GameResult.WON)));
@@ -245,18 +262,16 @@ class _GameBoardState extends State<GameBoard> {
     );
   }
 
-  @override
   Widget build(BuildContext context) {
-    FirebaseAdMob.instance.initialize(appId:"com.example.minesweeper").then((response){
-      myBanner..load()..show(
-        anchorOffset: 80.0,
+    FirebaseAdMob.instance.initialize(appId: BannerAd.testAdUnitId);
+    //Change appId With Admob Id
+    _bannerAd = createBannerAd()
+      ..load()
+      ..show(
         anchorType: AnchorType.top,
+        anchorOffset: 80.0,
       );
-    });
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
+
     int timeElapsed = stopwatch.elapsedMilliseconds ~/ 1000;
 
     return Scaffold(
@@ -271,13 +286,9 @@ class _GameBoardState extends State<GameBoard> {
         title: GradientText("MINDSWEEPER",
             gradient: LinearGradient(
                 begin: Alignment.topCenter,
-                end: Alignment.center,
+                end:Alignment.center ,
                 //end: Alignment.bottomCenter,
-                colors: [
-                  Colors.deepOrange[500],
-                  Colors.yellow[100],
-                  Colors.deepOrange
-                ]
+                colors: [Colors.deepOrange[500], Colors.yellow[100], Colors.deepOrange]
             ),
             style: TextStyle(fontSize: 20),
             textAlign: TextAlign.center),
@@ -287,7 +298,7 @@ class _GameBoardState extends State<GameBoard> {
       body: Column(
         children: [
           Padding(
-            padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
+            padding: EdgeInsets.fromLTRB(0,5, 0 ,0),
             //padding: EdgeInsets.all(5),
             child: Image.asset(
               'assets/images/river.jpg',
@@ -303,9 +314,10 @@ class _GameBoardState extends State<GameBoard> {
             child: SizedBox(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
+                children:[
+
                   _buildMinesFoundCountWidget(),
-                   _buildBestScoreWidget(),
+                  _buildBestScoreWidget(),
                   _buildTimerWidget(timeElapsed),
                 ],
 
@@ -313,62 +325,35 @@ class _GameBoardState extends State<GameBoard> {
             ),
 
           ),
-
-
           _buildBoard(),
-
-
         ],
-
       ),
-      bottomSheet: Container(
+      bottomSheet:Container(
         color: Colors.white,
-        height: 70,
+        height:70,
         child: Center(
             child: SizedBox(
               height: 60,
               child: RaisedButton(
                 color: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(10.0),
-                    side: BorderSide(color: Colors.green)),
-                onPressed: () => reset(),
+                shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(10.0),side: BorderSide(color: Colors.green)),
+                onPressed: () =>reset(),
                 child: Image.asset('assets/images/bomb.png'),
               ),
-
             )
-
-
         ),
       ),
-
-
     );
   }
-
-  /*
-  Check if the tile tapped lies inside the board or not. This is needed so that
-  you don't have to do extra handling in the surroundingMinesCount() method when
-  x or y become < 0 or greater than numOfColumns/numOfRows.
-   */
   bool isInBoard(int x, int y) =>
       x >= 0 && x < numOfColumns && y >= 0 && y < numOfRows;
 
-  /*
-  Check if the current tile has a mine or not. If it is, return 1 else return 0.
-  Return 1 so that this can help with the surroundingMinesCount() method.
-   */
   int isAMine(int x, int y) =>
       isInBoard(x, y) && gameTilesMineStatus[y][x] ? 1 : 0;
 
-  /*
-  Calculate the number of mines around a tile. The count would act as the number
-  to be displayed on the tile
-   */
   int surroundingMinesCount(int x, int y) {
     int count = 0;
 
-    //check left column
     count += isAMine(x - 1, y - 1);
     count += isAMine(x - 1, y);
     count += isAMine(x - 1, y + 1);
@@ -472,14 +457,12 @@ class _GameBoardState extends State<GameBoard> {
       _stopGameTimer();
       isUserAlive = false;
       final overlay = Overlay.of(context);
-      WidgetsBinding.instance.addPostFrameCallback((_) =>
-          overlay
-              .insert(_showGameStatusDialog(GameResult.TIME_LIMIT_EXCEEDED)));
+      WidgetsBinding.instance.addPostFrameCallback((_) => overlay
+          .insert(_showGameStatusDialog(GameResult.TIME_LIMIT_EXCEEDED)));
+//      _showGameStatusDialog(GameResult.TIME_LIMIT_EXCEEDED);
     }
-
     return Container(
       padding: const EdgeInsets.all(5.0),
-
       child: timeElapsed > timeLimit
           ? Text(
         "∞",
@@ -493,16 +476,15 @@ class _GameBoardState extends State<GameBoard> {
           _buildDigitContainer(hundredsDigit),
           _buildDigitContainer(tensDigit),
           _buildDigitContainer(unitsDigit),
-          Text(
-            "Sec", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24,),
-
-          )
+          Text("Sec",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 24.0,
+            ),),
         ],
       ),
     );
   }
-
-
   _buildMinesFoundCountWidget() {
     return Container(
       child: Center(
@@ -518,7 +500,6 @@ class _GameBoardState extends State<GameBoard> {
       ),
     );
   }
-
   _showGameStatusDialog(gameResult) async {
     print(gameResult);
     await showDialog(
@@ -527,18 +508,15 @@ class _GameBoardState extends State<GameBoard> {
           return _gameStatusDialog(gameResult);
         });
   }
-
   _gameStatusDialog(gameResult) {
     int timeElasped = stopwatch.elapsedMilliseconds ~/ 1000;
     String resultText = "You lost in $timeElasped Sec";
     switch (gameResult) {
       case GameResult.WON:
         resultText = "Congratulations... You win $timeElasped Sec";
-        reset();
         break;
       case GameResult.TIME_LIMIT_EXCEEDED:
         resultText = "Time up. You lost. in $timeElasped Sec";
-        reset();
         break;
       default:
     }
@@ -547,10 +525,9 @@ class _GameBoardState extends State<GameBoard> {
       content: Text(
         resultText,
         textAlign: TextAlign.center,
-         ),
+      ),
     );
   }
-
   _buildDigitContainer(int digit) {
     return Container(
       // width: .0,
@@ -565,12 +542,10 @@ class _GameBoardState extends State<GameBoard> {
       ),
     );
   }
-
   _stopGameTimer() {
     stopwatch.stop();
     timer?.cancel();
   }
-
   void fristinsert(int finalscore) async {
 
     Future<SharedPreferences> prefs = SharedPreferences.getInstance();
@@ -578,54 +553,27 @@ class _GameBoardState extends State<GameBoard> {
       prefs.then(
               (pref) {
             pref.setInt("score", finalscore);
-            BestScore = pref.getInt("score");
-
           }
       );
     }
+
 
   }
 
   _buildBestScoreWidget() {
     return Container(
-//       width: .0,
+//      width: .0,
       child: Center(
         child: Text(
           BestScore.toString(),
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 28.0,
-            color: Colors.green
+            color: Colors.green,
           ),
         ),
       ),
     );
   }
 }
-MobileAdTargetingInfo targetingInfo = new MobileAdTargetingInfo(
-  keywords: <String>['games','mineswiprrrr'],
-  contentUrl: 'https://flutter.io',
-  birthday: new DateTime.now(),
-  childDirected: false,
-  designedForFamilies: false,
-  testDevices: <String>[], // Android emulators are considered test devices
-);
 
-BannerAd myBanner = new BannerAd(
-  adUnitId: "ca-app-pub-3940256099942544/2934735716",
-  size: AdSize.leaderboard,
-  targetingInfo: targetingInfo,
-  listener: (MobileAdEvent
-  event) {
-    print("BannerAd event is $event");
-  },
-);
-
-InterstitialAd myInterstitial = InterstitialAd(
-  adUnitId: InterstitialAd.testAdUnitId,
-  targetingInfo: targetingInfo,
-  listener: (MobileAdEvent event) {
-    print("InterstitialAd event is $event");
-    print('$event');
-  },
-);

@@ -78,7 +78,7 @@ class RunScreenState extends State<RunScreen> {
                       setState(() {
                         Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context)=>GameBoard(Level: Choice, name: name, email: email, url: url),
+                            MaterialPageRoute(builder: (context)=>GameBoard(Level: Choice),
                             )
                         );
                       });
