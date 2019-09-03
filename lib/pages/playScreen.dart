@@ -76,6 +76,7 @@ class RunScreenState extends State<RunScreen> {
                     shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(50.0)),
                     onPressed: () {
                       setState(() {
+
                         Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context)=>GameBoard(Level: Choice),

@@ -27,13 +27,6 @@ class HomePage extends State<Settings> {
 
 
 
-  String _message = '';
-
-  void setMessage(String message) {
-    setState(() {
-      _message = message;
-    });
-  }
 
   Future<void> _sendAnalytics() async {
     await analytics.logEvent(
@@ -45,7 +38,6 @@ class HomePage extends State<Settings> {
         'fieldsObject': 'interaction',
       },
     );
-    setMessage('logEvent succeeded');
   }
 
   Future<void> _testSetCurrentScreen() async {
@@ -53,12 +45,11 @@ class HomePage extends State<Settings> {
       screenName: 'Settings PAge',
       screenClassOverride: 'AnalyticsDemo',
     );
-    setMessage('setCurrentScreen succeeded');
+
   }
 
   Future<void> _testSetSessionTimeoutDuration() async {
     await analytics.android?.setSessionTimeoutDuration(1000);
-    setMessage('setSessionTimeoutDuration succeeded');
   }
 
   PackageInfo _packageInfo = PackageInfo(
@@ -325,6 +316,15 @@ class HomePage extends State<Settings> {
 
   void _share() {
     print('ehjfduyv');
+    setState(() {
+      analytics.logEvent(
+        name: 'SocialShare_ACTION',
+        parameters: <String, dynamic>{
+
+        },
+      );
+    });
+
     Share.share('Welcome to Minesweeper Game');
   }
 

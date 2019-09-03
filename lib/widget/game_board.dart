@@ -13,13 +13,13 @@ import 'package:sqflite/sqflite.dart';
 import 'package:Minesweeper/model/highscoremodal.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
-
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_analytics/observer.dart';
 
 enum GameResult { WON, LOST, TIME_LIMIT_EXCEEDED }
 const String testDevice = "37376FFF466C63E06DABDCB2BAA5B58F";
 //AdRequest.Builder.addTestDevice("37376FFF466C63E06DABDCB2BAA5B58F")
 class GameBoard extends StatefulWidget {
-
   var Level;
   final Shader linearGradient = LinearGradient(
     colors: <Color>[Color(0xffDA44bb), Color(0xff8921aa)],
@@ -36,6 +36,8 @@ class _GameBoardState extends State<GameBoard> {
     nonPersonalizedAds: true,
     keywords: <String>['Game', 'Mario'],
   );
+  static FirebaseAnalytics analytics = FirebaseAnalytics();
+  static FirebaseAnalyticsObserver observer = FirebaseAnalyticsObserver(analytics: analytics);
 
   BannerAd _bannerAd;
   InterstitialAd _interstitialAd;
@@ -60,6 +62,20 @@ class _GameBoardState extends State<GameBoard> {
         listener: (MobileAdEvent event) {
           print("IntersttialAd $event");
         });
+  }
+
+  Future<void> _testSetCurrentScreen() async {
+    await analytics.setCurrentScreen(
+      screenName: 'Game BoardPage',
+      screenClassOverride: 'AnalyticsDemo',
+    );
+  }
+  Future<void> _sendAnalytics() async {
+    await analytics.logEvent(
+      name: 'Flag_Action',
+      parameters: <String, dynamic>{
+      },
+    );
   }
   var Level;
 
@@ -138,7 +154,7 @@ class _GameBoardState extends State<GameBoard> {
   }
   @override
   void initState() {
-
+    _testSetCurrentScreen();
     Future<SharedPreferences> prefs = SharedPreferences.getInstance();
 
     prefs.then(
@@ -208,11 +224,26 @@ class _GameBoardState extends State<GameBoard> {
           rowChildren.add(
             GestureDetector(
               onTap: () {
+                setState(() {
+                  analytics.logEvent(
+                    name: 'PlayGame_Action',
+                    parameters: <String, dynamic>{
+                    },
+                  );
+                });
+
                 //allow user to click a tile only if it is covered (so that
                 //we can't click on flagged tiles)
                 if (tileState == TileState.covered) tapTile(x, y);
               },
               onLongPress: () {
+                setState(() {
+                  analytics.logEvent(
+                    name: 'FlagOnTap_Action',
+                    parameters: <String, dynamic>{
+                    },
+                  );
+                });
                 flag(x, y);
               },
               child: Tile(
@@ -254,6 +285,11 @@ class _GameBoardState extends State<GameBoard> {
         hasUserWonGame = true;
         isUserAlive = false;
         _stopGameTimer();
+        analytics.logEvent(
+          name: 'GameComplete_Action',
+          parameters: <String, dynamic>{
+          },
+        );
         final overlay = Overlay.of(context);
         WidgetsBinding.instance.addPostFrameCallback(
                 (_) => overlay.insert(_showGameStatusDialog(GameResult.WON)));
@@ -345,7 +381,17 @@ class _GameBoardState extends State<GameBoard> {
               child: RaisedButton(
                 color: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(10.0),side: BorderSide(color: Colors.green)),
-                onPressed: () =>reset(),
+                onPressed: () {
+                  analytics.logEvent(
+                    name: 'ResetGame_Action',
+                    parameters: <String, dynamic>{
+                    },
+                  );
+                reset();
+              },
+//                onPressed: () =>
+//
+//                    reset(),
                 child: Image.asset('assets/images/bomb.png'),
               ),
             )
@@ -446,6 +492,11 @@ class _GameBoardState extends State<GameBoard> {
         gameTilesState[y][x] = TileState.blown;
         isUserAlive = false;
         _stopGameTimer();
+        analytics.logEvent(
+          name: 'GameLost_Action',
+          parameters: <String, dynamic>{
+          },
+        );
         _showGameStatusDialog(GameResult.LOST);
       } else {
         openTile(x, y);
