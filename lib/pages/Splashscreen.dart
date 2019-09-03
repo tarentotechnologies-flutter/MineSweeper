@@ -1,15 +1,20 @@
 import 'dart:async';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_analytics/observer.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info/package_info.dart';
 import 'package:Minesweeper/pages/playScreen.dart';
 import 'package:Minesweeper/pages/Settings.dart';
 
 
+
 class SplashScreen extends StatefulWidget {
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
 class _SplashScreenState extends State<SplashScreen> {
+
   PackageInfo _packageInfo = PackageInfo(
     appName: 'Unknown',
     packageName: 'Unknown',
@@ -20,11 +25,15 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     _initPackageInfo();
+//    navigatorObservers: <NavigatorObserver>[observer];
     Timer(
         Duration(seconds: 6),
-            () => Navigator.of(context).pushReplacement(MaterialPageRoute(
+            () =>
+                Navigator.of(context).pushReplacement(MaterialPageRoute(
 
-            builder: (BuildContext context) => Settings())));
+            builder: (BuildContext context) =>
+
+                Settings())));
   }
   Future<void> _initPackageInfo() async {
     final PackageInfo info = await PackageInfo.fromPlatform();

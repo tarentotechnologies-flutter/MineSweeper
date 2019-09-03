@@ -16,7 +16,8 @@ import 'package:flutter/services.dart';
 
 
 enum GameResult { WON, LOST, TIME_LIMIT_EXCEEDED }
-const String testDevice = 'MobileId';
+const String testDevice = "37376FFF466C63E06DABDCB2BAA5B58F";
+//AdRequest.Builder.addTestDevice("37376FFF466C63E06DABDCB2BAA5B58F")
 class GameBoard extends StatefulWidget {
 
   var Level;
@@ -41,7 +42,8 @@ class _GameBoardState extends State<GameBoard> {
 
   BannerAd createBannerAd() {
     return BannerAd(
-        adUnitId: BannerAd.testAdUnitId,
+        adUnitId: 'ca-app-pub-3940256099942544/2934735716',
+//        'ca-app-pub-4513385978792761/8978372017',
         //Change BannerAd adUnitId with Admob ID
         size: AdSize.banner,
         targetingInfo: targetingInfo,
@@ -138,9 +140,13 @@ class _GameBoardState extends State<GameBoard> {
   void initState() {
 
     Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+
     prefs.then(
             (pref) {
           BestScore = pref.getInt('score');
+          if(BestScore == null){
+            BestScore = 0;
+          }
           print(BestScore);
         });
 
@@ -263,7 +269,9 @@ class _GameBoardState extends State<GameBoard> {
   }
 
   Widget build(BuildContext context) {
-    FirebaseAdMob.instance.initialize(appId: BannerAd.testAdUnitId);
+    FirebaseAdMob.instance.initialize(appId: 'ca-app-pub-4513385978792761~3994881913');
+//        'ca-app-pub-4513385978792761~3994881913');
+//    'ca-app-pub-2197846689758151~3496597584'
     //Change appId With Admob Id
     _bannerAd = createBannerAd()
       ..load()

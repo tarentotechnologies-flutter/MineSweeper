@@ -1,36 +1,105 @@
+import 'package:firebase_analytics/observer.dart';
 import 'package:flutter/material.dart';
 //import 'package:Minesweeper/pages/profile_page.dart';
 import 'package:Minesweeper/widget/game_board.dart';
 import 'package:share/share.dart';
 import 'package:toast/toast.dart';
 import 'package:gradient_text/gradient_text.dart';
+import 'package:Minesweeper/main.dart';
 
 import 'package:package_info/package_info.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_analytics/observer.dart';
 import 'package:toast/toast.dart';
+
+
 class Settings extends StatefulWidget {
+//  get analytics => null;
+
   HomePage createState() => HomePage();
   final Shader linearGradient = LinearGradient(
     colors: <Color>[Color(0xffDA44bb), Color(0xff8921aa)],
   ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
 }
 class HomePage extends State<Settings> {
-/* Details of the package */
+  static FirebaseAnalytics analytics = FirebaseAnalytics();
+  static FirebaseAnalyticsObserver observer = FirebaseAnalyticsObserver(analytics: analytics);
+
+
+
+  String _message = '';
+
+  void setMessage(String message) {
+    setState(() {
+      _message = message;
+    });
+  }
+
+  Future<void> _sendAnalytics() async {
+    await analytics.logEvent(
+      name: 'Playbutton Clicked',
+      parameters: <String, dynamic>{
+        'eventCategory': 'ButtonClick',
+        'eventAction': 'ScreenInteraction',
+        'eventLabel': 'Play',
+        'fieldsObject': 'interaction',
+      },
+    );
+    setMessage('logEvent succeeded');
+  }
+
+  Future<void> _testSetCurrentScreen() async {
+    await analytics.setCurrentScreen(
+      screenName: 'Settings PAge',
+      screenClassOverride: 'AnalyticsDemo',
+    );
+    setMessage('setCurrentScreen succeeded');
+  }
+
+  Future<void> _testSetSessionTimeoutDuration() async {
+    await analytics.android?.setSessionTimeoutDuration(1000);
+    setMessage('setSessionTimeoutDuration succeeded');
+  }
+
   PackageInfo _packageInfo = PackageInfo(
     //appName: 'Unknown',
     packageName: 'Unknown',
     version: 'Unknown',
     // buildNumber: 'Unknown',
   );
+
   String _radioValue="Medium" ; //Initial definition of radio button value
   String choice='Medium';
   @override
   void initState() {
+
     setState(() {
       _initPackageInfo();
       _radioValue ="Medium";
     });
     super.initState();
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _testSetSessionTimeoutDuration();
+
+    //this method not called when user press android back button or quit
+    print('dispose');
+  }
+
+//  Future<Null> _currentScreen() async {
+//    await widget.analytics.setCurrentScreen(
+//        screenName: 'Settings', screenClassOverride: 'HomePage');
+//  }
+
+
+//  Future<Null> _sendAnalytics() async {
+//    await widget.analytics
+//        .logEvent(name: 'full_screen_tapped', parameters: <String, dynamic>{});
+//  }
+
   Future<void> _initPackageInfo() async {
     final PackageInfo info = await PackageInfo.fromPlatform();
     setState(() {
@@ -65,6 +134,7 @@ class HomePage extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+
       home: Scaffold(
         body:
         Column(
@@ -91,6 +161,17 @@ class HomePage extends State<Settings> {
                   // tooltip: 'Increase volume by 10',
                     onTap: () {
                       setState(() {
+                        print("MINE--------->");
+                        print(analytics.toString());
+                        analytics.logEvent(
+                          name: 'PLAY_ACTION',
+                          parameters: <String, dynamic>{
+
+                          },
+                        );
+
+//                        _sendAnalytics();
+//                        _testSetCurrentScreen();
                         if(choice != null) {
                           Navigator.push(
                             context,
@@ -183,7 +264,10 @@ class HomePage extends State<Settings> {
               ),
               Center(
                 child: IconButton(
-                  onPressed: (){_share();},
+                  onPressed: (){
+//                    _sendAnalytics;
+                    _share();
+                    },
                   icon: Icon(Icons.share, size: 35.0, color: Colors.deepOrange),
                   tooltip: 'Increase volume by 10',
                 ),
@@ -231,6 +315,9 @@ class HomePage extends State<Settings> {
           ),
         ),
       ),
+      navigatorObservers: [
+        FirebaseAnalyticsObserver(analytics: analytics),
+      ],
     );
   }
   void switchListener(bool val) {
@@ -240,4 +327,6 @@ class HomePage extends State<Settings> {
     print('ehjfduyv');
     Share.share('Welcome to Minesweeper Game');
   }
+
+
 }
