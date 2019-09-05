@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "44141730220",
+    "firebase_url": "https://minesweeper-2315b.firebaseio.com",
+    "project_id": "minesweeper-2315b",
+    "storage_bucket": "minesweeper-2315b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:44141730220:android:f782bfdc6cfeb54a",
+        "android_client_info": {
+          "package_name": "com.example.minesweeper"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "44141730220-mt9ejg7g014eabmesuortvlpvu3bie3i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.minesweeper",
+            "certificate_hash": "6fa491b74174322e9beabed239bbfdde94824d2e"
+          }
+        },
+        {
+          "client_id": "44141730220-rsf4sv5vpbupfqa23p837c32iv8qs5ja.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIMvjvN7Rmo2XPiBn4xVZC8z99VCRM738"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "44141730220-rsf4sv5vpbupfqa23p837c32iv8qs5ja.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

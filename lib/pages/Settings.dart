@@ -80,17 +80,6 @@ class HomePage extends State<Settings> {
     print('dispose');
   }
 
-//  Future<Null> _currentScreen() async {
-//    await widget.analytics.setCurrentScreen(
-//        screenName: 'Settings', screenClassOverride: 'HomePage');
-//  }
-
-
-//  Future<Null> _sendAnalytics() async {
-//    await widget.analytics
-//        .logEvent(name: 'full_screen_tapped', parameters: <String, dynamic>{});
-//  }
-
   Future<void> _initPackageInfo() async {
     final PackageInfo info = await PackageInfo.fromPlatform();
     setState(() {
@@ -149,26 +138,22 @@ class HomePage extends State<Settings> {
                 padding: EdgeInsets.fromLTRB(20,20, 20, 0),
     ),
               GestureDetector(
-                  // tooltip: 'Increase volume by 10',
                     onTap: () {
                       setState(() {
-                        print("MINE--------->");
-                        print(analytics.toString());
-                        analytics.logEvent(
-                          name: 'PLAY_ACTION',
-                          parameters: <String, dynamic>{
-
-                          },
-                        );
-
-//                        _sendAnalytics();
-//                        _testSetCurrentScreen();
                         if(choice != null) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => GameBoard(Level: choice),
                             ),
+                          );
+                          print("MINE--------->");
+                          print(analytics.toString());
+                          analytics.logEvent(
+                            name: 'PLAY_ACTION',
+                            parameters: <String, dynamic>{
+
+                            },
                           );
                         } else {
                           Toast.show("Please choose level", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.CENTER,);

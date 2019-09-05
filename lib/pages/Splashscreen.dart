@@ -27,7 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
     _initPackageInfo();
 //    navigatorObservers: <NavigatorObserver>[observer];
     Timer(
-        Duration(seconds: 6),
+        Duration(seconds: 3),
             () =>
                 Navigator.of(context).pushReplacement(MaterialPageRoute(
 
